@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LO HUB</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .task-item { transition: all 0.2s ease-in-out; }
+        .task-item:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <div class="md:hidden bg-white shadow-sm p-4 flex justify-between items-center z-20 border-b border-gray-100">
+        <div class="flex items-center gap-2 text-primary-600 font-bold text-xl">
+            <i data-lucide="layout-dashboard"></i>
+            <span>LO HUB</span>
+        </div>
+        <button id="mobile-menu-btn" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+            <i data-lucide="menu"></i>
+        </button>
+    </div>
+
+    <aside id="sidebar" class="bg-white w-full md:w-64 h-full border-r border-gray-200 flex flex-col absolute md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-lg md:shadow-none">
+        <div class="p-6 hidden md:flex items-center gap-2 text-primary-600 font-bold text-2xl border-b border-gray-100">
+            <i data-lucide="layout-dashboard" class="w-8 h-8"></i>
+            <span>LO HUB</span>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="#" id="nav-tsp" onclick="switchView('tsp')" class="flex items-center gap-3 px-4 py-3 bg-primary-50 text-primary-700 rounded-xl font-medium transition-all">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i> TSP (TikTok Shop Partner)
+            </a>
+            <a href="#" id="nav-settings" onclick="switchView('settings')" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-all">
+                <i data-lucide="settings" class="w-5 h-5"></i> Settings
+            </a>
+        </nav>
+    </aside>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden"></div>
+
+    <main class="flex-1 h-full overflow-y-auto relative bg-gray-50 p-4 md:p-8">
+        
+        <!-- === VIEW: TSP DASHBOARD === -->
+        <div id="view-tsp" class="block max-w-7xl mx-auto">
+            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">Brand Updates <i data-lucide="sparkles" class="w-6 h-6 text-yellow-500"></i></h1>
+                <div class="w-full sm:w-auto flex relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input type="text" id="search-input" placeholder="Search brands..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm shadow-sm">
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
+                <div id="card-filter-Active" onclick="toggleStatusFilter('Active')" class="bg-white p-5 rounded-2xl shadow-sm border-2 border-gray-100 hover:border-primary-300 cursor-pointer transition-all flex items-center gap-4">
+                    <div class="p-3 bg-green-50 text-green-600 rounded-xl"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900" id="active-brands-count">0</p>
+                        <p class="text-sm text-gray-500 font-medium">Active</p>
+                    </div>
+                </div>
+                <div id="card-filter-Pending" onclick="toggleStatusFilter('Pending')" class="bg-white p-5 rounded-2xl shadow-sm border-2 border-gray-100 hover:border-primary-300 cursor-pointer transition-all flex items-center gap-4">
+                    <div class="p-3 bg-orange-50 text-orange-600 rounded-xl"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900" id="pending-brands-count">0</p>
+                        <p class="text-sm text-gray-500 font-medium">Pending</p>
+                    </div>
+                </div>
+                <div id="card-filter-Issue" onclick="toggleStatusFilter('Issue')" class="bg-white p-5 rounded-2xl shadow-sm border-2 border-gray-100 hover:border-primary-300 cursor-pointer transition-all flex items-center gap-4">
+                    <div class="p-3 bg-red-50 text-red-600 rounded-xl"><i data-lucide="alert-circle" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900" id="issue-brands-count">0</p>
+                        <p class="text-sm text-gray-500 font-medium">Issue</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h2 class="text-xl font-bold text-gray-900" id="grid-header-title">All TSPs</h2>
+                    <button id="clear-filter-btn" onclick="toggleStatusFilter('All')" class="hidden text-sm text-primary-700 font-bold bg-primary-100 hover:bg-primary-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                        Clear Filter <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="brand-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Brands injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- === VIEW: SETTINGS === -->
+        <div id="view-settings" class="hidden max-w-6xl mx-auto">
+            <header class="mb-8">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Settings</h1>
+                <p class="text-sm text-gray-500 mt-1">Manage personal preferences and admin tasks.</p>
+            </header>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row min-h-[600px] md:h-[calc(100vh-12rem)]">
+                
+                <div class="w-full md:w-64 border-b md:border-b-0 md:border-r border-gray-100 p-4 space-y-1 bg-gray-50/50 flex-shrink-0">
+                    <button onclick="switchSettingsTab('general')" id="tab-general" class="w-full flex items-center gap-3 px-4 py-3 bg-primary-50 text-primary-700 rounded-xl font-medium transition-colors text-left">
+                        <i data-lucide="user" class="w-5 h-5"></i> General
+                    </button>
+                    <button onclick="switchSettingsTab('tsp')" id="tab-tsp" class="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-colors text-left">
+                        <i data-lucide="shopping-bag" class="w-5 h-5"></i> TSP Management
+                    </button>
+                </div>
+
+                <div class="flex-1 p-6 md:p-8 bg-white flex flex-col h-full overflow-hidden">
+                    
+                    <div id="settings-general" class="block overflow-y-auto h-full">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">General Information</h2>
+                        <div class="max-w-md space-y-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                <input type="text" value="LO HUB Admin" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input type="email" value="admin@lohub.com" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            </div>
+                            <button class="px-5 py-2.5 text-white bg-gray-900 hover:bg-gray-800 rounded-xl text-sm font-medium transition-colors mt-2 shadow-sm">
+                                Save Profile
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="settings-tsp" class="hidden h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                            <h2 class="text-xl font-bold text-gray-900">TSP Management</h2>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-6 flex-shrink-0">Add, delete, or modify brands and contract status.</p>
+
+                        <!-- Add Brand Form -->
+                        <div class="bg-primary-50 p-4 rounded-xl mb-6 border border-primary-100 flex-shrink-0">
+                            <h3 class="text-sm font-bold text-primary-800 mb-3">Add New Brand</h3>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" id="new-brand-name" placeholder="Brand Name" class="w-full sm:flex-1 px-3 py-2 bg-white border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm shadow-sm">
+                                
+                                <div class="flex items-center gap-2 justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0">
+                                    <div class="relative group cursor-pointer" title="Upload Logo">
+                                        <input type="file" id="new-brand-logo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewNewLogo(this)">
+                                        <div id="new-logo-preview" class="w-10 h-10 flex items-center justify-center rounded-lg border border-primary-200 bg-white text-primary-500 group-hover:bg-primary-100 transition-colors overflow-hidden shadow-sm">
+                                            <i data-lucide="image" class="w-5 h-5"></i>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="toggleNewContract(this)" type="button" class="w-10 h-10 flex items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-600 transition-colors flex-shrink-0 shadow-sm" title="Contract Status: Active">
+                                        <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                                        <input type="hidden" id="new-brand-contract" value="Active">
+                                    </button>
+
+                                    <button onclick="addNewBrand()" class="h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                                        <i data-lucide="plus" class="w-4 h-4"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brand List Area -->
+                        <div id="settings-tsp-list" class="space-y-3 flex-1 overflow-y-auto pr-2 pb-8">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="brand-modal" class="fixed inset-0 bg-gray-900 bg-opacity-60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity p-4 md:p-6">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-200 h-[90vh] md:h-[85vh] flex flex-col" id="brand-modal-content">
+            
+            <!-- Modal Header -->
+            <div class="p-5 md:px-8 md:py-6 border-b border-gray-100 flex justify-between items-center bg-white flex-shrink-0 z-20 shadow-sm relative">
+                <div class="flex items-center gap-4">
+                    <div id="modal-brand-avatar-container" class="shadow-sm rounded-xl">
+                        <!-- Avatar injects here -->
+                    </div>
+                    <div>
+                        <h2 id="modal-brand-name" class="text-2xl font-bold text-gray-900 tracking-tight">Brand Name</h2>
+                        <p class="text-sm text-gray-500 font-medium mt-0.5">Brand Dashboard</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 p-2.5 rounded-full transition-all hover:shadow-sm">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col md:flex-row flex-1 overflow-hidden bg-gray-50">
+                
+                <!-- Left Column: Add/Edit Update Form -->
+                <div class="w-full md:w-2/5 p-6 md:p-8 border-b md:border-b-0 md:border-r border-gray-200 bg-white overflow-y-auto flex-shrink-0 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+                    <form id="modal-form" class="space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-primary-50 text-primary-600 rounded-xl">
+                                <i data-lucide="pen-tool" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-lg" id="modal-form-title">New Log Entry</h3>
+                        </div>
+                        
+                        <!-- Hidden Inputs -->
+                        <input type="hidden" id="modal-brand-id">
+                        <input type="hidden" id="modal-log-index" value="-1">
+                        
+                        <div class="bg-gray-50 p-1 rounded-xl border border-gray-100">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-3 pt-2">Current Status</label>
+                            <select id="modal-brand-status" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-semibold text-gray-700 shadow-sm transition-shadow">
+                                <option value="Active">🟢 Active (Running smoothly)</option>
+                                <option value="Pending">🟡 Pending (Waiting for action)</option>
+                                <option value="Issue">🔴 Issue (Needs attention)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-1 rounded-xl border border-gray-100">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-3 pt-2">Update Details</label>
+                            <textarea id="modal-brand-update" rows="4" required placeholder="Ex: Client approved the new campaign assets..." class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm resize-none shadow-sm transition-shadow"></textarea>
+                        </div>
+
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Tasks & Reminders</label>
+                                <button type="button" onclick="addTaskField()" class="text-xs bg-white border border-gray-200 hover:border-primary-300 text-primary-600 font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1 transition-colors">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> Add Task
+                                </button>
+                            </div>
+                            <div id="task-fields-container" class="space-y-2">
+                                <!-- Tasks dynamically injected here -->
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Lark Link (Optional)</label>
+                            <div class="flex relative">
+                                <i data-lucide="link" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                                <input type="url" id="modal-brand-link" placeholder="https://..." class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm shadow-sm transition-shadow">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" id="cancel-edit-btn" class="hidden px-5 py-3.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold transition-all shadow-sm">
+                                Cancel
+                            </button>
+                            <button type="submit" id="submit-update-btn" class="flex-1 py-3.5 text-white bg-primary-600 hover:bg-primary-700 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_0_rgba(37,99,235,0.2)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5">
+                                <i data-lucide="send" class="w-4 h-4" id="submit-btn-icon"></i>
+                                <span id="submit-btn-text">Submit Update</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="w-full md:w-3/5 overflow-y-auto flex-1 bg-gray-50 relative flex flex-col">
+                    <div class="sticky top-0 bg-gray-50/90 backdrop-blur-md px-6 py-4 md:px-8 border-b border-gray-200 z-20 flex gap-4">
+                        <button onclick="switchModalTab('history')" id="tab-history" class="pb-2 text-sm font-bold border-b-2 border-primary-600 text-primary-600 flex items-center gap-2 transition-colors">
+                            <i data-lucide="history" class="w-4 h-4"></i> History
+                        </button>
+                        <button onclick="switchModalTab('tasks')" id="tab-tasks" class="pb-2 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-colors">
+                            <i data-lucide="check-square" class="w-4 h-4"></i> Pending Tasks
+                            <span id="modal-pending-badge" class="hidden bg-orange-100 text-orange-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 md:p-8 flex-1">
+                        <!-- History View -->
+                        <div id="modal-history-view" class="block">
+                            <div id="modal-logs-container" class="space-y-2">
+                                <!-- Logs injected here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Tasks View -->
+                        <div id="modal-tasks-view" class="hidden space-y-3">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="task-alarms-container" class="fixed bottom-4 right-4 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        lucide.createIcons();
+
+        // Data Setup (Empty array)
+        let brands = [];
+        let currentStatusFilter = 'All';
+
+        window.checkTaskDueDates = function() {
+            const now = new Date();
+            brands.forEach(brand => {
+                if(brand.contractStatus === 'Ended') return; 
+                brand.logs.forEach((log, logIndex) => {
+                    if (log.tasks) {
+                        log.tasks.forEach((task, taskIndex) => {
+                            // Only check if not completed. Pop-up is persistent until marked done.
+                            if (!task.completed && task.datetime) {
+                                const dueDate = new Date(task.datetime);
+                                if (now >= dueDate) {
+                                    showTaskNotification(brand, logIndex, taskIndex);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        };
+
+        window.showTaskNotification = function(brand, logIndex, taskIndex) {
+            const task = brand.logs[logIndex].tasks[taskIndex];
+            const container = document.getElementById('task-alarms-container');
+            
+            const toastId = `toast-${brand.id}-${logIndex}-${taskIndex}`;
+            if(document.getElementById(toastId)) return; 
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            // Aggressive Overdue Styling
+            toast.className = 'bg-red-50 rounded-xl shadow-2xl border-l-4 border-red-600 p-4 w-80 pointer-events-auto transform transition-all duration-300 translate-x-full relative overflow-hidden ring-1 ring-red-200';
+            
+            toast.innerHTML = `
+                <div class="absolute top-0 right-0 p-2 opacity-10"><i data-lucide="siren" class="w-16 h-16 text-red-600"></i></div>
+                <div class="flex justify-between items-start mb-2 relative z-10">
+                    <div class="flex items-center gap-2 text-red-700 font-extrabold text-sm uppercase tracking-wide">
+                        <i data-lucide="flame" class="w-4 h-4 animate-bounce"></i> Overdue Task!
+                    </div>
+                </div>
+                <h4 class="font-bold text-gray-900 truncate relative z-10 text-lg">${brand.name}</h4>
+                <p class="text-sm text-gray-800 mb-4 line-clamp-2 relative z-10 font-bold">${task.description}</p>
+                <div class="flex gap-2 relative z-10">
+                    <button onclick="markTaskDoneFromNotification(${brand.id}, ${logIndex}, ${taskIndex}, '${toastId}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-lg transition-colors shadow-md border border-red-700">
+                        Mark Done
+                    </button>
+                    <button onclick="openBrandAndDismiss(${brand.id}, '${toastId}')" class="flex-1 bg-white hover:bg-gray-50 text-gray-800 text-xs font-bold py-2.5 rounded-lg transition-colors shadow-sm border border-gray-200">
+                        View Details
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 50);
+        };
+
+        window.dismissTaskNotification = function(toastId) {
+            const toast = document.getElementById(toastId);
+            if(toast) {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }
+        };
+
+        window.markTaskDoneFromNotification = function(brandId, logIndex, taskIndex, toastId) {
+            toggleTaskComplete(brandId, logIndex, taskIndex);
+        };
+
+        window.openBrandAndDismiss = function(brandId, toastId) {
+            openModal(brandId);
+            switchModalTab('tasks');
+            dismissTaskNotification(toastId);
+        };
+
+        setInterval(checkTaskDueDates, 10000);
+        setTimeout(checkTaskDueDates, 2000);
+
+        window.toggleStatusFilter = function(status) {
+            if (currentStatusFilter === status) currentStatusFilter = 'All';
+            else currentStatusFilter = status;
+            
+            ['Active', 'Pending', 'Issue'].forEach(s => {
+                const card = document.getElementById(`card-filter-${s}`);
+                if (card) {
+                    if (currentStatusFilter === s) {
+                        card.classList.add('border-primary-500', 'bg-primary-50');
+                        card.classList.remove('border-gray-100', 'bg-white');
+                    } else {
+                        card.classList.remove('border-primary-500', 'bg-primary-50');
+                        card.classList.add('border-gray-100', 'bg-white');
+                    }
+                }
+            });
+
+            const titleEl = document.getElementById('grid-header-title');
+            const clearBtn = document.getElementById('clear-filter-btn');
+            
+            if (currentStatusFilter === 'All') {
+                titleEl.innerText = 'All TSPs';
+                clearBtn.classList.add('hidden');
+            } else {
+                titleEl.innerText = `${currentStatusFilter} TSPs`;
+                clearBtn.classList.remove('hidden');
+            }
+
+            renderBrands(document.getElementById('search-input').value);
+        };
+
+        function switchView(view) {
+            const views = { tsp: document.getElementById('view-tsp'), settings: document.getElementById('view-settings') };
+            const navs = { tsp: document.getElementById('nav-tsp'), settings: document.getElementById('nav-settings') };
+            const activeClass = ['bg-primary-50', 'text-primary-700'];
+            const inactiveClass = ['text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900'];
+
+            Object.keys(views).forEach(k => {
+                if (k === view) {
+                    views[k].classList.remove('hidden'); views[k].classList.add('block');
+                    navs[k].classList.add(...activeClass); navs[k].classList.remove(...inactiveClass);
+                } else {
+                    views[k].classList.remove('block'); views[k].classList.add('hidden');
+                    navs[k].classList.remove(...activeClass); navs[k].classList.add(...inactiveClass);
+                }
+            });
+
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+        }
+
+        function switchSettingsTab(tab) {
+            const tabs = { general: document.getElementById('tab-general'), tsp: document.getElementById('tab-tsp') };
+            const contents = { general: document.getElementById('settings-general'), tsp: document.getElementById('settings-tsp') };
+            const activeClass = ['bg-primary-50', 'text-primary-700'];
+            const inactiveClass = ['text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900'];
+
+            Object.keys(tabs).forEach(k => {
+                if (k === tab) {
+                    contents[k].classList.remove('hidden');
+                    tabs[k].classList.add(...activeClass); tabs[k].classList.remove(...inactiveClass);
+                } else {
+                    contents[k].classList.add('hidden');
+                    tabs[k].classList.remove(...activeClass); tabs[k].classList.add(...inactiveClass);
+                }
+            });
+        }
+
+        window.renderTSPSettings = function() {
+            const container = document.getElementById('settings-tsp-list');
+            if(!container) return;
+            
+            container.innerHTML = brands.map(b => `
+                <div class="flex flex-col sm:flex-row gap-3 p-3 bg-white border border-gray-100 rounded-xl items-center hover:border-primary-200 transition-colors w-full shadow-sm">
+                    <div class="w-full sm:flex-1">
+                        <input type="text" id="edit-name-${b.id}" value="${b.name}" placeholder="Brand Name" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-medium text-gray-900 transition-colors">
+                    </div>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-gray-100 pt-3 sm:pt-0">
+                        <div class="relative group cursor-pointer" title="Change Logo">
+                            <input type="file" id="edit-logo-${b.id}" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewEditLogo(this, ${b.id})">
+                            <div id="edit-logo-preview-${b.id}" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors overflow-hidden">
+                                ${b.logo ? `<img src="${b.logo}" class="w-full h-full object-cover">` : `<i data-lucide="image" class="w-4 h-4"></i>`}
+                            </div>
+                        </div>
+
+                        <button onclick="toggleContract(${b.id}, this)" type="button" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg border transition-colors ${b.contractStatus === 'Active' ? 'border-green-200 bg-green-50 text-green-600' : 'border-gray-200 bg-gray-50 text-gray-400'}" title="Contract Status: ${b.contractStatus}">
+                            <i data-lucide="${b.contractStatus === 'Active' ? 'file-check-2' : 'file-x-2'}" class="w-4 h-4"></i>
+                            <input type="hidden" id="edit-contract-${b.id}" value="${b.contractStatus}">
+                        </button>
+
+                        <div class="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
+
+                        <button onclick="saveBrandSettings(${b.id}, this)" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm flex-shrink-0" title="Save Changes">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <button onclick="deleteBrand(${b.id}, this)" data-confirm="false" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-sm flex-shrink-0" title="Delete Brand">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        window.previewNewLogo = function(input) {
+            const preview = document.getElementById('new-logo-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`; };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.previewEditLogo = function(input, id) {
+            const preview = document.getElementById(`edit-logo-preview-${id}`);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`; };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.toggleNewContract = function(btn) {
+            const input = document.getElementById('new-brand-contract');
+            if (input.value === 'Active') {
+                btn.className = 'w-10 h-10 flex items-center justify-center rounded-lg border transition-colors border-gray-200 bg-white text-gray-400 flex-shrink-0 shadow-sm';
+                btn.title = 'Contract Status: Ended';
+                btn.innerHTML = `<i data-lucide="file-x-2" class="w-5 h-5"></i><input type="hidden" id="new-brand-contract" value="Ended">`;
+            } else {
+                btn.className = 'w-10 h-10 flex items-center justify-center rounded-lg border transition-colors border-green-200 bg-green-50 text-green-600 flex-shrink-0 shadow-sm';
+                btn.title = 'Contract Status: Active';
+                btn.innerHTML = `<i data-lucide="file-check-2" class="w-5 h-5"></i><input type="hidden" id="new-brand-contract" value="Active">`;
+            }
+            lucide.createIcons();
+        };
+
+        window.toggleContract = function(id, btn) {
+            const input = document.getElementById(`edit-contract-${id}`);
+            if (input.value === 'Active') {
+                btn.className = 'w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg border transition-colors border-gray-200 bg-gray-50 text-gray-400';
+                btn.title = 'Contract Status: Ended';
+                btn.innerHTML = `<i data-lucide="file-x-2" class="w-4 h-4"></i><input type="hidden" id="edit-contract-${id}" value="Ended">`;
+            } else {
+                btn.className = 'w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg border transition-colors border-green-200 bg-green-50 text-green-600';
+                btn.title = 'Contract Status: Active';
+                btn.innerHTML = `<i data-lucide="file-check-2" class="w-4 h-4"></i><input type="hidden" id="edit-contract-${id}" value="Active">`;
+            }
+            lucide.createIcons();
+        };
+
+        window.addNewBrand = function() {
+            const nameInput = document.getElementById('new-brand-name');
+            const logoInput = document.getElementById('new-brand-logo');
+            const contractInput = document.getElementById('new-brand-contract');
+            
+            const name = nameInput.value.trim();
+            if (!name) {
+                nameInput.classList.add('border-red-500', 'placeholder-red-500');
+                return;
+            }
+            nameInput.classList.remove('border-red-500', 'placeholder-red-500');
+            
+            const newId = brands.length > 0 ? Math.max(...brands.map(b => b.id)) + 1 : 1;
+            const newBrand = {
+                id: newId,
+                name: name,
+                logo: '',
+                contractStatus: contractInput.value,
+                logs: [{
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                    status: 'Active',
+                    update: 'New brand added to the system.',
+                    tasks: []
+                }]
+            };
+
+            const finishAdding = () => {
+                brands.unshift(newBrand);
+                nameInput.value = '';
+                logoInput.value = '';
+                document.getElementById('new-logo-preview').innerHTML = `<i data-lucide="image" class="w-5 h-5"></i>`;
+                lucide.createIcons();
+                renderTSPSettings();
+                renderBrands(document.getElementById('search-input').value);
+            };
+
+            if (logoInput.files && logoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { newBrand.logo = e.target.result; finishAdding(); };
+                reader.readAsDataURL(logoInput.files[0]);
+            } else {
+                finishAdding();
+            }
+        };
+
+        window.deleteBrand = function(id, btnElement) {
+            if (btnElement.dataset.confirm === 'true') {
+                brands = brands.filter(b => b.id !== id);
+                renderTSPSettings();
+                renderBrands(document.getElementById('search-input').value);
+            } else {
+                btnElement.dataset.confirm = 'true';
+                btnElement.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+                btnElement.classList.replace('bg-red-50', 'bg-red-600');
+                btnElement.classList.replace('text-red-600', 'text-white');
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    if(document.body.contains(btnElement)) {
+                        btnElement.dataset.confirm = 'false';
+                        btnElement.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+                        btnElement.classList.replace('bg-red-600', 'bg-red-50');
+                        btnElement.classList.replace('text-white', 'text-red-600');
+                        lucide.createIcons();
+                    }
+                }, 3000);
+            }
+        };
+
+        window.saveBrandSettings = function(id, btnElement) {
+            const newName = document.getElementById(`edit-name-${id}`).value.trim();
+            const fileInput = document.getElementById(`edit-logo-${id}`);
+            const newContract = document.getElementById(`edit-contract-${id}`).value;
+            
+            const brandIndex = brands.findIndex(b => b.id === id);
+            if(brandIndex !== -1) {
+                if(newName) brands[brandIndex].name = newName;
+                brands[brandIndex].contractStatus = newContract;
+                
+                btnElement.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+                btnElement.classList.replace('bg-gray-900', 'bg-green-600');
+                lucide.createIcons();
+                
+                const finishSave = () => {
+                    setTimeout(() => {
+                        renderTSPSettings();
+                        renderBrands(document.getElementById('search-input').value);
+                    }, 500);
+                };
+
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { brands[brandIndex].logo = e.target.result; finishSave(); };
+                    reader.readAsDataURL(fileInput.files[0]);
+                } else {
+                    finishSave();
+                }
+            }
+        };
+
+        window.renderBrands = function(filterText = '') {
+            const grid = document.getElementById('brand-grid');
+            grid.innerHTML = '';
+            
+            let filteredBrands = brands.filter(b => {
+                // Filter out Ended contracts from Dashboard
+                if (b.contractStatus === 'Ended') return false;
+
+                const latestStatus = b.logs.length > 0 ? b.logs[0].status : '';
+                
+                const matchesText = b.name.toLowerCase().includes(filterText.toLowerCase()) || 
+                                    latestStatus.toLowerCase().includes(filterText.toLowerCase());
+                
+                const matchesStatus = currentStatusFilter === 'All' || latestStatus === currentStatusFilter;
+
+                return matchesText && matchesStatus;
+            });
+
+            if (filteredBrands.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-gray-100 text-gray-500 shadow-sm">No active brands found for this filter.</div>`;
+            }
+
+            filteredBrands.forEach(brand => {
+                // Calculate Pending & Overdue Tasks
+                let pendingTasksCount = 0;
+                let overdueTasksCount = 0;
+                const now = new Date();
+                
+                brand.logs.forEach(log => {
+                    if (log.tasks) {
+                        log.tasks.forEach(t => {
+                            if (!t.completed) {
+                                pendingTasksCount++;
+                                if (t.datetime && now >= new Date(t.datetime)) {
+                                    overdueTasksCount++;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                const div = document.createElement('div');
+                div.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-primary-300 cursor-pointer transition-all duration-200 group flex flex-col h-full relative';
+                div.onclick = () => openModal(brand.id);
+                
+                const latestLog = brand.logs[0] || { status: 'Active', update: 'No updates.', date: 'N/A' };
+                let statusClass = latestLog.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 
+                                  latestLog.status === 'Issue' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-orange-100 text-orange-700 border-orange-200';
+
+                const avatarHtml = brand.logo 
+                    ? `<img src="${brand.logo}" alt="${brand.name}" class="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm">`
+                    : `<div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl border border-primary-100 group-hover:bg-primary-600 group-hover:text-white transition-colors shadow-sm">${brand.name.charAt(0)}</div>`;
+
+                // Aggressive Badge for overdue tasks
+                let pendingBadge = '';
+                if (overdueTasksCount > 0) {
+                    pendingBadge = `<div class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md flex items-center gap-1 border border-red-500 z-10 animate-pulse">
+                        <i data-lucide="flame" class="w-3 h-3"></i> ${overdueTasksCount} Overdue
+                    </div>`;
+                } else if (pendingTasksCount > 0) {
+                    pendingBadge = `<div class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md flex items-center gap-1 border border-orange-400 z-10">
+                        <i data-lucide="alert-triangle" class="w-3 h-3"></i> ${pendingTasksCount} Task${pendingTasksCount > 1 ? 's' : ''}
+                    </div>`;
+                }
+
+                div.innerHTML = `
+                    ${pendingBadge}
+                    <div class="flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-3">
+                            ${avatarHtml}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${statusClass}">
+                                ${latestLog.status}
+                            </span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-1">${brand.name}</h3>
+                        <p class="text-sm text-gray-600 line-clamp-2 flex-grow mb-4 bg-gray-50 p-2 rounded-lg border border-gray-100">${latestLog.update}</p>
+                        
+                        <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+                            <div class="flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                <span>${latestLog.date}</span>
+                            </div>
+                            <span class="text-primary-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                View <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+            
+            lucide.createIcons();
+            updateStats();
+        }
+
+        function updateStats() {
+            // Count stats only for Active/Pending Contracts
+            const activeBrands = brands.filter(b => b.contractStatus !== 'Ended');
+            
+            const active = activeBrands.filter(b => b.logs.length > 0 && b.logs[0].status === 'Active').length;
+            const pending = activeBrands.filter(b => b.logs.length > 0 && b.logs[0].status === 'Pending').length;
+            const issues = activeBrands.filter(b => b.logs.length > 0 && b.logs[0].status === 'Issue').length;
+            
+            document.getElementById('active-brands-count').innerText = active;
+            document.getElementById('pending-brands-count').innerText = pending;
+            document.getElementById('issue-brands-count').innerText = issues;
+        }
+
+        window.switchModalTab = function(tab) {
+            const historyView = document.getElementById('modal-history-view');
+            const tasksView = document.getElementById('modal-tasks-view');
+            const historyTab = document.getElementById('tab-history');
+            const tasksTab = document.getElementById('tab-tasks');
+            
+            if (tab === 'history') {
+                historyView.classList.remove('hidden');
+                historyView.classList.add('block');
+                tasksView.classList.remove('block');
+                tasksView.classList.add('hidden');
+                
+                historyTab.classList.replace('border-transparent', 'border-primary-600');
+                historyTab.classList.replace('text-gray-500', 'text-primary-600');
+                
+                tasksTab.classList.replace('border-primary-600', 'border-transparent');
+                tasksTab.classList.replace('text-primary-600', 'text-gray-500');
+            } else {
+                tasksView.classList.remove('hidden');
+                tasksView.classList.add('block');
+                historyView.classList.remove('block');
+                historyView.classList.add('hidden');
+                
+                tasksTab.classList.replace('border-transparent', 'border-primary-600');
+                tasksTab.classList.replace('text-gray-500', 'text-primary-600');
+                
+                historyTab.classList.replace('border-primary-600', 'border-transparent');
+                historyTab.classList.replace('text-primary-600', 'text-gray-500');
+            }
+        };
+
+        window.resetEditState = function() {
+            document.getElementById('modal-log-index').value = '-1';
+            document.getElementById('modal-brand-update').value = '';
+            document.getElementById('modal-brand-status').value = 'Active';
+            document.getElementById('modal-brand-link').value = '';
+            document.getElementById('submit-btn-text').innerText = 'Submit Update';
+            document.getElementById('submit-btn-icon').setAttribute('data-lucide', 'send');
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            document.getElementById('modal-form-title').innerHTML = 'New Log Entry';
+            
+            // Clear tasks
+            document.getElementById('task-fields-container').innerHTML = '';
+            lucide.createIcons();
+        };
+
+        window.addTaskField = function(desc = '', datetime = '') {
+            const container = document.getElementById('task-fields-container');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center bg-white p-1 rounded-lg border border-gray-200 shadow-sm';
+            
+            let iconClass = datetime ? 'text-primary-600 bg-primary-50' : 'text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-600';
+            let formattedDateTooltip = datetime ? new Date(datetime).toLocaleString() : 'Set Date & Time';
+
+            div.innerHTML = `
+                <div class="relative group" title="${formattedDateTooltip}">
+                    <div class="w-8 h-8 rounded flex items-center justify-center cursor-pointer transition-colors border border-transparent group-hover:border-gray-200 ${iconClass}">
+                        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                    </div>
+                    <input type="datetime-local" class="task-datetime absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" value="${datetime}" onchange="updateTaskDateIcon(this)">
+                </div>
+                <input type="text" placeholder="Task description..." value="${desc}" class="task-desc flex-1 px-2 py-1.5 text-sm focus:outline-none bg-transparent" required>
+                <button type="button" onclick="this.parentElement.remove()" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+            
+            container.appendChild(div);
+            lucide.createIcons();
+        };
+
+        window.updateTaskDateIcon = function(input) {
+            const iconContainer = input.previousElementSibling;
+            if (input.value) {
+                iconContainer.className = 'w-8 h-8 rounded flex items-center justify-center cursor-pointer transition-colors border border-transparent group-hover:border-gray-200 text-primary-600 bg-primary-50';
+                input.parentElement.title = new Date(input.value).toLocaleString();
+            } else {
+                iconContainer.className = 'w-8 h-8 rounded flex items-center justify-center cursor-pointer transition-colors border border-transparent group-hover:border-gray-200 text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-600';
+                input.parentElement.title = 'Set Date & Time';
+            }
+        };
+
+        window.toggleTaskComplete = function(brandId, logIndex, taskIndex) {
+            const brand = brands.find(b => b.id === brandId);
+            if(brand) {
+                const task = brand.logs[logIndex].tasks[taskIndex];
+                task.completed = !task.completed;
+
+                if (task.completed) {
+                    const toastId = `toast-${brand.id}-${logIndex}-${taskIndex}`;
+                    if(document.getElementById(toastId)) dismissTaskNotification(toastId);
+                }
+
+                renderBrands(document.getElementById('search-input').value);
+                
+                // Refresh modal dynamically
+                const modalIdInput = document.getElementById('modal-brand-id');
+                if (modalIdInput && parseInt(modalIdInput.value) === brandId && !document.getElementById('brand-modal').classList.contains('hidden')) {
+                    renderLogsHistory(brand.logs, brand.id);
+                    renderTasksView(brand.logs, brand.id);
+                }
+            }
+        };
+
+        function openModal(id) {
+            const brand = brands.find(b => b.id === id);
+            if (!brand) return;
+
+            resetEditState(); 
+            switchModalTab('history'); // Default to history tab
+            
+            document.getElementById('modal-brand-id').value = brand.id;
+            document.getElementById('modal-brand-name').innerText = brand.name;
+            
+            const avatarContainer = document.getElementById('modal-brand-avatar-container');
+            if (brand.logo) {
+                avatarContainer.innerHTML = `<img src="${brand.logo}" class="w-10 h-10 rounded-lg object-cover border border-gray-200 shadow-sm">`;
+            } else {
+                avatarContainer.innerHTML = `<div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg border bg-primary-100 text-primary-700 border-primary-200">${brand.name.charAt(0)}</div>`;
+            }
+
+            renderLogsHistory(brand.logs, brand.id);
+            renderTasksView(brand.logs, brand.id);
+
+            const modal = document.getElementById('brand-modal');
+            const content = document.getElementById('brand-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { content.classList.remove('scale-95'); content.classList.add('scale-100'); }, 10); 
+        }
+
+        function renderLogsHistory(logs, brandId) {
+            const container = document.getElementById('modal-logs-container');
+            
+            if (!logs || logs.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-sm">
+                            <i data-lucide="inbox" class="w-8 h-8 text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-900 font-bold text-lg">No updates yet</p>
+                        <p class="text-sm text-gray-500 mt-1 max-w-xs">Be the first to log an update for this brand using the form on the left.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = logs.map((log, index) => {
+                let statusColor = log.status === 'Active' ? 'text-green-700 bg-green-50 border-green-200' : 
+                                  log.status === 'Issue' ? 'text-red-700 bg-red-50 border-red-200' : 'text-orange-700 bg-orange-50 border-orange-200';
+                
+                let iconCircle = log.status === 'Active' ? 'bg-green-500 border-green-100' : 
+                                 log.status === 'Issue' ? 'bg-red-500 border-red-100' : 'bg-orange-500 border-orange-100';
+
+                const isLast = index === logs.length - 1;
+
+                // 24 Hours Verification 
+                const isEditable = log.timestamp && (Date.now() - log.timestamp < 86400000);
+                let actionButtons = '';
+                
+                if (isEditable) {
+                    actionButtons = `
+                        <div class="flex gap-4 mt-3 pt-3 border-t border-gray-100 justify-end relative z-10">
+                            <button type="button" onclick="editLog(${brandId}, ${index})" class="text-xs text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1.5 transition-colors"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit</button>
+                            <button type="button" onclick="deleteLog(${brandId}, ${index}, this)" data-confirm="false" class="text-xs text-red-500 hover:text-red-700 font-bold flex items-center gap-1.5 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete</button>
+                        </div>
+                    `;
+                }
+
+                // Render tasks specifically for this log inside the timeline view
+                let tasksHtml = '';
+                if (log.tasks && log.tasks.length > 0) {
+                    const now = new Date();
+                    const innerTasks = log.tasks.map((task, tIndex) => {
+                        const isOverdue = !task.completed && task.datetime && now >= new Date(task.datetime);
+                        let taskBg = isOverdue ? 'bg-red-50 border-red-200 ring-1 ring-red-100' : 'bg-gray-50 border-gray-100';
+                        let taskText = isOverdue ? 'text-red-900 font-bold' : 'text-gray-800 font-medium';
+                        let dateText = task.completed ? 'text-gray-500' : isOverdue ? 'text-red-700 font-bold bg-red-100 px-1.5 py-0.5 rounded' : 'text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded';
+
+                        return `
+                            <div class="flex items-start gap-2.5 p-2.5 rounded-xl border ${taskBg} task-item transition-all shadow-sm">
+                                <button type="button" onclick="toggleTaskComplete(${brandId}, ${index}, ${tIndex})" class="mt-0.5 flex-shrink-0 w-4 h-4 rounded border ${task.completed ? 'bg-primary-500 border-primary-500 text-white' : isOverdue ? 'border-red-400 bg-white hover:border-red-600' : 'border-gray-300 bg-white hover:border-primary-400'} flex items-center justify-center transition-colors">
+                                    ${task.completed ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
+                                </button>
+                                <div class="flex-1">
+                                    <p class="text-sm ${taskText} ${task.completed ? 'line-through text-gray-500' : ''}">${task.description}</p>
+                                    <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                                        ${task.datetime ? `<span class="text-[10px] font-bold ${dateText} flex items-center gap-1">${isOverdue ? '<i data-lucide="flame" class="w-3 h-3"></i> OVERDUE:' : '<i data-lucide="calendar" class="w-3 h-3"></i> Due:'} ${new Date(task.datetime).toLocaleString()}</span>` : ''}
+                                        ${log.link ? `
+                                            <a href="${log.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 hover:text-primary-700 px-1.5 py-0.5 rounded border border-primary-100 transition-colors">
+                                                <i data-lucide="external-link" class="w-3 h-3"></i> Lark Link
+                                            </a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    tasksHtml = `<div class="mt-3 space-y-1.5 relative z-10">${innerTasks}</div>`;
+                }
+
+                return `
+                    <div id="log-entry-${index}" class="relative pl-8 pb-4 group">
+                        <!-- Vertical Line -->
+                        ${!isLast ? '<div class="absolute top-8 left-[11px] bottom-0 w-0.5 bg-gray-200 group-hover:bg-primary-300 transition-colors rounded-full"></div>' : ''}
+                        
+                        <!-- Dot -->
+                        <div class="absolute top-2.5 left-0 w-6 h-6 rounded-full border-4 ${iconCircle} shadow-sm z-10 transition-transform group-hover:scale-110"></div>
+                        
+                        <!-- Card -->
+                        <div id="log-card-${index}" class="p-5 border border-gray-200 rounded-2xl bg-white shadow-sm hover:shadow-md hover:border-primary-200 transition-all duration-500 ml-1 relative">
+                            <div class="absolute top-4 -left-1.5 w-3 h-3 bg-inherit border-l border-b border-gray-200 rotate-45 group-hover:border-primary-200 transition-colors"></div>
+
+                            <div class="flex flex-wrap justify-between items-start mb-3 gap-2 relative z-10">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${statusColor}">
+                                    ${log.status === 'Active' ? '🟢 Active' : (log.status === 'Issue' ? '🔴 Issue' : '🟡 Pending')}
+                                </span>
+                                <span class="text-xs font-medium text-gray-500 flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${log.date}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed relative z-10 font-medium">${log.update}</p>
+                            ${tasksHtml}
+                            ${log.link && (!log.tasks || log.tasks.length === 0) ? `
+                                <div class="mt-3 relative z-10">
+                                    <a href="${log.link}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 hover:text-primary-700 px-3 py-1.5 rounded-lg border border-primary-100 transition-colors">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Lark Link
+                                    </a>
+                                </div>
+                            ` : ''}
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function renderTasksView(logs, brandId) {
+            const container = document.getElementById('modal-tasks-view');
+            const badge = document.getElementById('modal-pending-badge');
+            
+            let allTasks = [];
+            let pendingCount = 0;
+
+            logs.forEach((log, logIndex) => {
+                if (log.tasks) {
+                    log.tasks.forEach((task, taskIndex) => {
+                        if (!task.completed) pendingCount++;
+                        allTasks.push({
+                            ...task,
+                            logIndex,
+                            taskIndex,
+                            logDate: log.date,
+                            logLink: log.link
+                        });
+                    });
+                }
+            });
+
+            if (pendingCount > 0) {
+                badge.innerText = pendingCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (allTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                        <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
+                            <i data-lucide="check-square" class="w-6 h-6 text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-900 font-bold text-base">No tasks</p>
+                        <p class="text-xs text-gray-500 mt-1 max-w-xs">Tasks added to log entries will appear here.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            // Sort: pending first, then by date
+            allTasks.sort((a, b) => {
+                if (a.completed === b.completed) {
+                    return new Date(a.datetime || 0) - new Date(b.datetime || 0);
+                }
+                return a.completed ? 1 : -1;
+            });
+
+            const now = new Date();
+
+            container.innerHTML = allTasks.map(task => {
+                const isOverdue = !task.completed && task.datetime && now >= new Date(task.datetime);
+                
+                let cardClasses = task.completed ? 'bg-white border-gray-100 opacity-60' : 
+                                  isOverdue ? 'bg-red-50 border-red-300 shadow-md ring-1 ring-red-200' : 'bg-white border-gray-200 shadow-sm';
+                                  
+                let dueTextClasses = task.completed ? '' : isOverdue ? 'text-red-700 bg-red-100 px-2 py-0.5 rounded font-bold flex items-center gap-1' : 'text-orange-600 bg-orange-50 px-2 py-0.5 rounded flex items-center gap-1';
+                let dueIcon = isOverdue ? '<i data-lucide="flame" class="w-3 h-3"></i>' : '<i data-lucide="calendar" class="w-3 h-3"></i>';
+                let duePrefix = isOverdue ? 'OVERDUE:' : 'Due:';
+
+                return `
+                    <div class="flex items-start gap-3 p-4 rounded-xl border ${cardClasses} task-item relative overflow-hidden">
+                        ${isOverdue ? '<div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>' : ''}
+                        <button type="button" onclick="toggleTaskComplete(${brandId}, ${task.logIndex}, ${task.taskIndex})" class="mt-0.5 flex-shrink-0 w-5 h-5 rounded border ${task.completed ? 'bg-primary-500 border-primary-500 text-white' : isOverdue ? 'border-red-400 bg-white hover:border-red-600' : 'border-gray-300 bg-white hover:border-primary-400'} flex items-center justify-center transition-colors relative z-10">
+                            ${task.completed ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                        </button>
+                        <div class="flex-1 relative z-10">
+                            <p class="text-sm ${isOverdue ? 'font-bold text-gray-900' : 'font-medium text-gray-800'} ${task.completed ? 'line-through text-gray-500' : ''}">${task.description}</p>
+                            
+                            <div class="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] font-medium text-gray-500">
+                                ${task.datetime ? `<span class="${dueTextClasses}">${dueIcon} ${duePrefix} ${new Date(task.datetime).toLocaleString()}</span>` : ''}
+                                <button type="button" onclick="jumpToLog(${task.logIndex})" class="flex items-center gap-1 bg-white border border-gray-200 px-2 py-0.5 rounded hover:bg-primary-50 hover:text-primary-700 hover:border-primary-300 transition-colors cursor-pointer shadow-sm"><i data-lucide="file-text" class="w-3 h-3"></i> From log: ${task.logDate}</button>
+                                ${task.logLink ? `<a href="${task.logLink}" target="_blank" class="flex items-center gap-1 text-primary-700 bg-primary-50 border border-primary-200 px-2 py-0.5 rounded hover:bg-primary-100 transition-colors"><i data-lucide="external-link" class="w-3 h-3"></i> Lark Link</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.editLog = function(brandId, logIndex) {
+            const brand = brands.find(b => b.id === brandId);
+            if(!brand) return;
+            const log = brand.logs[logIndex];
+            
+            document.getElementById('modal-log-index').value = logIndex;
+            document.getElementById('modal-brand-status').value = log.status;
+            document.getElementById('modal-brand-update').value = log.update;
+            document.getElementById('modal-brand-link').value = log.link || '';
+            
+            // Populate tasks in edit view
+            document.getElementById('task-fields-container').innerHTML = '';
+            if(log.tasks) {
+                log.tasks.forEach(t => addTaskField(t.description, t.datetime));
+            }
+            
+            document.getElementById('modal-form-title').innerHTML = '<span class="text-primary-600">Edit Log Entry</span>';
+            document.getElementById('submit-btn-text').innerText = 'Save Changes';
+            document.getElementById('submit-btn-icon').setAttribute('data-lucide', 'save');
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            
+            switchModalTab('history');
+            lucide.createIcons();
+        };
+
+        window.deleteLog = function(brandId, logIndex, btnElement) {
+            if (btnElement.dataset.confirm === 'true') {
+                const brand = brands.find(b => b.id === brandId);
+                if(brand) {
+                    brand.logs.splice(logIndex, 1);
+                    renderBrands(document.getElementById('search-input').value);
+                    openModal(brandId);
+                }
+            } else {
+                const originalHTML = btnElement.innerHTML;
+                btnElement.dataset.confirm = 'true';
+                btnElement.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> Sure?';
+                btnElement.classList.replace('text-red-500', 'text-red-700');
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    if(document.body.contains(btnElement)) {
+                        btnElement.dataset.confirm = 'false';
+                        btnElement.innerHTML = originalHTML;
+                        btnElement.classList.replace('text-red-700', 'text-red-500');
+                        lucide.createIcons();
+                    }
+                }, 3000);
+            }
+        };
+
+        window.closeModal = function() {
+            const modal = document.getElementById('brand-modal');
+            const content = document.getElementById('brand-modal-content');
+            content.classList.remove('scale-100'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+        }
+
+        document.getElementById('brand-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'brand-modal') closeModal();
+        });
+
+        document.getElementById('cancel-edit-btn').addEventListener('click', resetEditState);
+
+        document.getElementById('modal-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const brandId = parseInt(document.getElementById('modal-brand-id').value);
+            const logIndex = parseInt(document.getElementById('modal-log-index').value);
+            const brand = brands.find(b => b.id === brandId);
+            
+            if(brand) {
+                const newStatus = document.getElementById('modal-brand-status').value;
+                const newUpdate = document.getElementById('modal-brand-update').value.trim();
+                const newLink = document.getElementById('modal-brand-link').value.trim();
+                
+                // Harvest Tasks
+                const taskDescInputs = document.querySelectorAll('.task-desc');
+                const taskDateInputs = document.querySelectorAll('.task-datetime');
+                let tasks = [];
+                
+                taskDescInputs.forEach((input, i) => {
+                    if(input.value.trim() !== '') {
+                        tasks.push({
+                            description: input.value.trim(),
+                            datetime: taskDateInputs[i].value,
+                            completed: false
+                        });
+                    }
+                });
+                
+                if (logIndex === -1) {
+                    brand.logs.unshift({
+                        timestamp: Date.now(),
+                        date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                        status: newStatus,
+                        update: newUpdate,
+                        link: newLink,
+                        tasks: tasks
+                    });
+                } else {
+                    brand.logs[logIndex].status = newStatus;
+                    brand.logs[logIndex].update = newUpdate;
+                    brand.logs[logIndex].link = newLink;
+                    
+                    const oldTasks = brand.logs[logIndex].tasks || [];
+                    tasks.forEach((newTask, i) => {
+                        if (oldTasks[i] && oldTasks[i].description === newTask.description) {
+                            newTask.completed = oldTasks[i].completed;
+                        }
+                    });
+                    brand.logs[logIndex].tasks = tasks;
+                }
+                
+                resetEditState();
+                renderBrands(document.getElementById('search-input').value);
+                openModal(brandId); 
+            }
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => renderBrands(e.target.value));
+
+        // Mobile Sidebar Events
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            document.getElementById('sidebar-overlay').classList.toggle('hidden');
+        }
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleSidebar);
+        document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+        // Highlight and Jump Logic
+        window.jumpToLog = function(logIndex) {
+            // Switch to the History tab
+            switchModalTab('history');
+            
+            // Allow a brief moment for the DOM to update visibility before scrolling
+            setTimeout(() => {
+                const logEntry = document.getElementById(`log-entry-${logIndex}`);
+                const logCard = document.getElementById(`log-card-${logIndex}`);
+                
+                if (logEntry && logCard) {
+                    // Smooth scroll to the specific log
+                    logEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Highlight the card temporarily so the user finds it easily
+                    logCard.classList.remove('bg-white', 'border-gray-200');
+                    logCard.classList.add('bg-primary-50', 'border-primary-400', 'ring-4', 'ring-primary-100');
+                    
+                    // Remove highlight after 2 seconds
+                    setTimeout(() => {
+                        logCard.classList.add('bg-white', 'border-gray-200');
+                        logCard.classList.remove('bg-primary-50', 'border-primary-400', 'ring-4', 'ring-primary-100');
+                    }, 2000);
+                }
+            }, 50);
+        };
+
+        // Initialization
+        renderBrands();
+        renderTSPSettings();
+    </script>
+</body>
+</html>
